@@ -17,7 +17,7 @@ def main():
     logging.info("Grid client for projectTS initiated")
     keepalive_thread = keepalive.initiate_interval() # TODO: not needed to be joined but do make sure
     threading.Thread(target=keep_consuming(mqchannel), daemon=True).start()
-    threading.Thread(target=run_server(), daemon=True).start()
+    threading.Thread(target=run_server, daemon=True).start()
     tray.show_tray()
     # keepalive_thread.join() # not available currently
     pynvml.nvmlShutdown()
