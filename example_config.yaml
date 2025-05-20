@@ -1,0 +1,13 @@
+tray:
+  icon_path: data/images/icon.png
+
+api:
+  base_url:
+
+mq:
+  rabbitmq:
+    host:
+    port: 5672
+    vhost:
+    user:
+    pass:
