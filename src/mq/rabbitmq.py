@@ -26,15 +26,18 @@ def get_rabbitmq_connection():
     return connection, channel
 
 def keep_consuming(mqchannel):
-    while True:
-        try:
-            mqchannel.queue_declare(queue='node.TEST01', durable=True)
-            mqchannel.basic_consume(
-                queue='node.TEST01',
-                on_message_callback=callback,
-                auto_ack=True
-            )
-            mqchannel.start_consuming()
-        except Exception as e:
-            traceback.print_exc()
-            sleep(10)
+    def inner_method():
+        while True:
+            try:
+                mqchannel.queue_declare(queue='node.TEST01', durable=True)
+                mqchannel.basic_consume(
+                    queue='node.TEST01',
+                    on_message_callback=callback,
+                    auto_ack=True
+                )
+                mqchannel.start_consuming()
+            except Exception as e:
+                traceback.print_exc()
+                sleep(10)
+
+    return inner_method
