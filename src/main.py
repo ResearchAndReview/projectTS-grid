@@ -20,7 +20,6 @@ def main():
     threading.Thread(target=run_server, daemon=True).start()
     tray.show_tray()
     # keepalive_thread.join() # not available currently
-    pynvml.nvmlShutdown()
 
 
 if __name__ == "__main__":

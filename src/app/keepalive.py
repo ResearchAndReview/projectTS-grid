@@ -1,19 +1,11 @@
 import logging
 import threading
 import time
-import platform
 
 import cpuinfo
 import psutil
-import numpy as np
 import requests
 from pynvml_utils import nvidia_smi
-
-
-def print_hello():
-    while True:
-        logging.info("HELLO")
-        time.sleep(10)
 
 def print_system_info():
     cpu_info = cpuinfo.get_cpu_info()
@@ -39,12 +31,7 @@ def print_system_info():
             'vramUsage': res_util_list[0]['fb_memory_usage']['used'],
         }
 
-        logging.info(payload)
-
         response = requests.post(f"https://js.thxx.xyz/node/keepalive?nodeId={nodeId}", json=payload)
-
-
-        logging.info(response)
 
         time.sleep(10)
 
