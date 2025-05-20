@@ -1,4 +1,5 @@
 import logging
+import threading
 
 from pystray import Icon, MenuItem, Menu
 from PIL import Image
@@ -13,12 +14,13 @@ def show_tray():
         "test_tray",
         icon_image,
         menu=Menu(
-            MenuItem("연구검토단 Grid System Prototype", print_something,enabled=False),
+            MenuItem("연구검토단 Grid System Prototype", print_something, enabled=False),
             MenuItem("기여도: 391", print_something),
             MenuItem("종료", on_exit),
         )
     )
     icon.run()
+
 
 
 def on_exit(icon:Icon):
