@@ -16,6 +16,10 @@ app= Flask("HTTP API")
 def test():
     return "Hello World", 200
 
+@app.route('/getStatus', methods=['GET'])
+def getStatus():
+    return "ACTIVE", 200
+
 @app.route('/ocr', methods=['POST'])
 def ocr_():
     """POST 요청의 JSON 본문에서 Base64 인코딩된 이미지를 받아 OCR 처리하는 API"""

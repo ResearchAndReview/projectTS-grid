@@ -45,6 +45,7 @@ def file_select_ocr(icon: Icon):
         image = Image.open(file_path)
         print(fully_operating_ocr(image))
 
+    icon.notify("OCR 작업 완료됨", "OCR 완료")
 
 
 

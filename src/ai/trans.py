@@ -1,6 +1,6 @@
 from google.cloud import translate_v3
 
-PROJECT_ID = "gen-lang-client-0464426043"
+PROJECT_ID = "youtubeapi3-277821"
 
 def trans(
     text: str = "YOUR_TEXT_TO_TRANSLATE",

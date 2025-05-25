@@ -1,13 +1,94 @@
+import base64
+import io
+import json
+import logging
 import traceback
 from time import sleep
 
 import pika
+import requests
+from PIL import Image
 
+from src.ai import detect_paragraph
+from src.ai.ocr import fully_operating_ocr, ocr
+from src.ai.trans import trans
 from src.config import get_config
 
-def callback(channel, method, properties, body):
-    print(f"메시지 수신됨: {body.decode()}")
+def handle_ocr_task(message):
+    response = requests.post(f"https://js.thxx.xyz/task/accept-ocr?ocrTaskId={message['ocrTaskId']}",
+                             headers={"x-uuid": "TEST01"})
+    base64_string = message['imageData']
+    if ',' in base64_string:
+        header, base64_data = base64_string.split(',', 1)
+        print(f"데이터 URI 헤더 발견: {header}")
+        # 필요하다면 header에서 MIME 타입 등을 파싱할 수 있습니다.
+        # e.g., mime_type = header.split(';')[0].split(':')[1]
+    else:
+        # 순수 Base64 문자열이라고 가정
+        base64_data = base64_string
+    try:
+        # 3. Base64 문자열을 바이너리 데이터로 디코딩
+        image_bytes = base64.b64decode(base64_data)
+        decoded_size = len(image_bytes)
+        print(f"Base64 디코딩 완료, 크기: {decoded_size} bytes")
 
+        img = Image.open(io.BytesIO(image_bytes))
+        img.verify()  # 이미지 데이터 유효성 검사
+        # verify() 후에는 다시 열어야 실제 작업 가능
+        img = Image.open(io.BytesIO(image_bytes))
+        print(f"이미지 형식: {img.format}, 크기: {img.size}, 모드: {img.mode}")
+        # img 객체로 추가 처리 가능
+        bounding_box = detect_paragraph.detect_paragraph(img)
+        result = {"captions": []}
+        for x, y, w, h in bounding_box:
+            crop_img = img.crop((x, y, x + w, y + h))
+            text = ocr(crop_img)
+            result["captions"].append({
+                "x": x,
+                "y": y,
+                "width": w,
+                "height": h,
+                "text": text
+            })
+
+        notify_ocr_success_response = requests.post(
+            f"https://js.thxx.xyz/task/notify/ocr-success?ocrTaskId={message['ocrTaskId']}", json=result, headers={'x-uuid': 'TEST01'})
+    except Exception as e:
+        logging.error(traceback.format_exc())
+        payload = {
+            "error": e
+        }
+        notify_ocr_failed_response = requests.post(
+            f"https://js.thxx.xyz/task/notify/ocr-failed?ocrTaskId={message['ocrTaskId']}", json=payload, headers={'x-uuid': 'TEST01'})
+
+def handle_trans_task(message):
+    try:
+        response = requests.post(f"https://js.thxx.xyz/task/accept-trans?transTaskId={message['transTaskId']}",
+                                 headers={"x-uuid": "TEST01"})
+        translated_text = trans(message['originalText'])
+        payload = {
+            'translatedText': translated_text,
+        }
+        requests.post(f"https://js.thxx.xyz/task/notify/trans-success?transTaskId={message['transTaskId']}",
+                      json=payload, headers={'x-uuid': 'TEST01'})
+    except Exception as e:
+        logging.error(traceback.format_exc())
+        payload = {
+            "error": "gTrans FAILED"
+        }
+        notify_trans_failed_response = requests.post(
+            f"https://js.thxx.xyz/task/notify/trans-failed?transTaskId={message['transTaskId']}",
+            json=payload, headers={'x-uuid': 'TEST01'})
+
+
+def callback(channel, method, properties, body):
+    message = json.loads(body.decode())
+    #logging.info(f"Received message: {message}")
+    if message["taskType"] == 0: # OCR
+        handle_ocr_task(message)
+
+    elif message["taskType"] == 1: # Trans
+        handle_trans_task(message)
 
 def get_rabbitmq_connection():
     config = get_config()['mq']['rabbitmq']
