@@ -1,5 +1,8 @@
 import logging
+import os
+import sys
 import threading
+from multiprocessing.spawn import freeze_support
 
 import pynvml
 
@@ -10,6 +13,11 @@ from src.mq.rabbitmq import keep_consuming, get_rabbitmq_connection
 
 
 def main():
+    freeze_support()
+    try:
+        os.chdir(sys._MEIPASS)
+    finally:
+        pass
     config.load_config()
 
     pynvml.nvmlInit()

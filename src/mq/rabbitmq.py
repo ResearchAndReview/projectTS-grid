@@ -2,6 +2,7 @@ import base64
 import io
 import json
 import logging
+import time
 import traceback
 from time import sleep
 
@@ -17,6 +18,7 @@ from src.config import get_config
 def handle_ocr_task(message):
     response = requests.post(f"https://js.thxx.xyz/task/accept-ocr?ocrTaskId={message['ocrTaskId']}",
                              headers={"x-uuid": "TEST01"})
+    start_time = time.time()
     base64_string = message['imageData']
     if ',' in base64_string:
         header, base64_data = base64_string.split(',', 1)
@@ -50,6 +52,11 @@ def handle_ocr_task(message):
                 "height": h,
                 "text": text
             })
+        end_time = time.time()
+        elapsed_time = end_time - start_time
+        logging.info(f"OCR 작업 완료, 소요 시간: {elapsed_time}초")
+
+        result['elapsedTime'] = elapsed_time
 
         notify_ocr_success_response = requests.post(
             f"https://js.thxx.xyz/task/notify/ocr-success?ocrTaskId={message['ocrTaskId']}", json=result, headers={'x-uuid': 'TEST01'})
@@ -65,10 +72,15 @@ def handle_trans_task(message):
     try:
         response = requests.post(f"https://js.thxx.xyz/task/accept-trans?transTaskId={message['transTaskId']}",
                                  headers={"x-uuid": "TEST01"})
+        start_time = time.time()
         translated_text = trans(message['originalText'])
         payload = {
             'translatedText': translated_text,
         }
+        end_time = time.time()
+        elapsed_time = end_time - start_time
+        payload['elapsedTime'] = elapsed_time
+
         requests.post(f"https://js.thxx.xyz/task/notify/trans-success?transTaskId={message['transTaskId']}",
                       json=payload, headers={'x-uuid': 'TEST01'})
     except Exception as e:
