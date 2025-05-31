@@ -79,7 +79,9 @@ def handle_trans_task(message):
         }
         end_time = time.time()
         elapsed_time = end_time - start_time
+        logging.info(f"번역 작업 완료, 소요 시간: {elapsed_time}초")
         payload['elapsedTime'] = elapsed_time
+
 
         requests.post(f"https://js.thxx.xyz/task/notify/trans-success?transTaskId={message['transTaskId']}",
                       json=payload, headers={'x-uuid': 'TEST01'})

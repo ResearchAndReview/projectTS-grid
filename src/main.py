@@ -16,7 +16,7 @@ def main():
     freeze_support()
     try:
         os.chdir(sys._MEIPASS)
-    finally:
+    except:
         pass
     config.load_config()
 
