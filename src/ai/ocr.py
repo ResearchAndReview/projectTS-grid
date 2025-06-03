@@ -13,11 +13,6 @@ def ocr(img, src_lang="일본어"):
 
 def fully_operating_ocr(img):
     try:
-        # 전체 이미지 판단이므로 일단은 이렇게
-        # x, y = 0, 0
-        # width, height = img.width, img.height
-        # text = ocr_trans.ocr(img)
-
         bounding_box = detect_paragraph(img)
         result = {"captions": []}
         for x, y, w, h in bounding_box:
@@ -31,7 +26,6 @@ def fully_operating_ocr(img):
                 "text": text
             })
 
-        # 4. 성공 응답 반환
         return result
 
     except Exception as e:
