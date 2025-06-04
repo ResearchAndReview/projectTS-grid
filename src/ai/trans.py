@@ -1,23 +1,22 @@
-from google.cloud import translate_v3
+from transformers import(
+    EncoderDecoderModel,
+    PreTrainedTokenizerFast,
+    BertJapaneseTokenizer,
+)
 
-PROJECT_ID = "youtubeapi3-277821"
+import torch
 
-def trans(
-    text: str = "YOUR_TEXT_TO_TRANSLATE",
-    language_code: str = "ko",
-) -> str:
+encoder_model_name = "cl-tohoku/bert-base-japanese-v2"
+decoder_model_name = "skt/kogpt2-base-v2"
 
-    client = translate_v3.TranslationServiceClient()
-    parent = f"projects/{PROJECT_ID}/locations/global"
-    response = client.translate_text(
-        contents=[text],
-        target_language_code=language_code,
-        parent=parent,
-        mime_type="text/plain",
-        source_language_code="ja"
-    )
+src_tokenizer = BertJapaneseTokenizer.from_pretrained(encoder_model_name)
+trg_tokenizer = PreTrainedTokenizerFast.from_pretrained(decoder_model_name)
 
-    for translation in response.translations:
-        return translation.translated_text
-    
-    return ""
+model = EncoderDecoderModel.from_pretrained("sappho192/ffxiv-ja-ko-translator")
+
+def trans(text_src):
+    embeddings = src_tokenizer(text_src, return_attention_mask=False, return_token_type_ids=False, return_tensors='pt')
+    embeddings = {k: v for k, v in embeddings.items()}
+    output = model.generate(**embeddings, max_length=500)[0, 1:-1]
+    text_trg = trg_tokenizer.decode(output.cpu())
+    return text_trg

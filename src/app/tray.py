@@ -32,7 +32,7 @@ def on_exit(icon:Icon):
     icon.stop()
 
 def print_something(icon:Icon):
-    logging.info("HELLO")
+    pass
 
 def file_select_ocr(icon: Icon):
     window = tk.Tk()

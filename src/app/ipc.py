@@ -1,6 +1,6 @@
 from flask import Flask, request
 
-import os
+import time
 
 from flask import Flask, request, jsonify
 import base64
@@ -8,9 +8,16 @@ import io
 import binascii # Base64 디코딩 오류 처리를 위해
 
 from PIL import Image
-from src.ai import ocr, trans, detect_paragraph
+from src.ai import trans
+from src.ai import ocr, performance_manage, detect_paragraph
 
 app= Flask("HTTP API")
+
+# Performance 수치
+# TODO : 작업 종료 시에 로컬에 저장하고 다시 불러오는 기능 필요
+
+ocr_perf = performance_manage.PerformanceManager(500*500)
+trans_perf = performance_manage.PerformanceManager(50)
 
 @app.route('/', methods=['GET'])
 def test():
@@ -74,6 +81,7 @@ def ocr_():
         # width, height = img.width, img.height
         # text = ocr_trans.ocr(img)
 
+        start_time = time.time()
         bounding_box = detect_paragraph.detect_paragraph(img)
         result = { "captions": [] }
         for x, y, w, h in bounding_box:
@@ -86,6 +94,10 @@ def ocr_():
                 "height": h,
                 "text": text
             })
+        end_time = time.time()
+        calc_perf = (img.height * img.width) ** 1.5 / (end_time - start_time)
+        ocr_perf.update(calc_perf=calc_perf)
+        print(f"ocr_perf: {ocr_perf.perf}")
 
         # 4. 성공 응답 반환
         return jsonify(result), 200
@@ -122,7 +134,13 @@ def translation_():
         return jsonify({"error": "JSON 본문에 'translateTo' 키가 비어있습니다."}), 400
     
     try:
+        start_time = time.time()
         translated_text = trans.trans(data['originalText'])
+        end_time = time.time()
+        calc_perf = len(data['originalText']) ** 1.5 / (end_time - start_time)
+        trans_perf.update(calc_perf=calc_perf)
+        print(f"trans_perf: {trans_perf.perf}")
+
         return jsonify({
             'originalText': data['originalText'],
             'translatedText': translated_text

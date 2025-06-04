@@ -7,6 +7,8 @@ import psutil
 import requests
 from pynvml_utils import nvidia_smi
 
+from src.app.ipc import ocr_perf, trans_perf
+
 def print_system_info():
     cpu_info = cpuinfo.get_cpu_info()
     nvsmi = nvidia_smi.getInstance()
@@ -29,6 +31,8 @@ def print_system_info():
             'gpuUsage': gpu_util,
             'vram': res_util_list[0]['fb_memory_usage']['total'],
             'vramUsage': res_util_list[0]['fb_memory_usage']['used'],
+            'ocr_perf': ocr_perf.perf,
+            'trans_perf': trans_perf.perf
         }
 
         response = requests.post(f"https://js.thxx.xyz/node/keepalive?nodeId={nodeId}", json=payload)
