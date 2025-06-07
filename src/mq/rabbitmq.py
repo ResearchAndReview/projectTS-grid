@@ -74,6 +74,7 @@ def handle_trans_task(message):
                                  headers={"x-uuid": "TEST01"})
         start_time = time.time()
         translated_text = trans(message['originalText'])
+        logging.info(f"번역된 텍스트: {translated_text}")
         payload = {
             'translatedText': translated_text,
         }

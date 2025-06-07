@@ -24,7 +24,7 @@ def detect_paragraph(image: Image.Image, merge: bool=True) -> list[(int, int, in
 
         ract.append([xmin, xmax, ymin, ymax])
 
-    is_in = lambda xmin, xmax, ymin, ymax, px, py, thre=10: xmin-thre <= px <= xmax+thre and ymin-thre <= py <= ymax+thre
+    is_in = lambda xmin, xmax, ymin, ymax, px, py, thre=5: xmin-thre <= px <= xmax+thre and ymin-thre <= py <= ymax+thre
     gen_point = lambda xmin, xmax, ymin, ymax: [(x, y) for x in [xmin, xmax] for y in [ymin, ymax]]
 
     n = len(ract)
