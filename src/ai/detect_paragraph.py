@@ -5,7 +5,7 @@ from PIL import ImageDraw, Image
 from src.ai.util import pil_cv2_convert
 from src.ai.util import union_find
 
-def detect_paragraph(image: Image.Image) -> list[(int, int, int, int)]:
+def detect_paragraph(image: Image.Image, merge: bool=False) -> list[(int, int, int, int)]:
     reader = easyocr.Reader(['ja'])
     ract, free = reader.detect(pil_cv2_convert.pil2cv(image), slope_ths=0.5, canvas_size=500000)
     ract = ract[0]
@@ -47,7 +47,11 @@ def detect_paragraph(image: Image.Image) -> list[(int, int, int, int)]:
 
     temp = [None for _ in range(n)]
     for i in range(n):
-        j = uf.find(i)
+        if merge: 
+            j = uf.find(i)
+        else: 
+            j = i
+
         if not temp[j]:
             temp[j] = ract[i]
         else:
