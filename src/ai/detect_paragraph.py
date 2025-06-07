@@ -53,9 +53,9 @@ def detect_paragraph(image: Image.Image, merge: bool=True) -> list[(int, int, in
             temp[j] = ract[i]
         else:
             temp[j][0] = min(temp[j][0], ract[i][0])
-            temp[j][1] = max(temp[j][1], ract[j][1])
-            temp[j][2] = min(temp[j][2], ract[j][2])
-            temp[j][3] = max(temp[j][3], ract[j][3])
+            temp[j][1] = max(temp[j][1], ract[i][1])
+            temp[j][2] = min(temp[j][2], ract[i][2])
+            temp[j][3] = max(temp[j][3], ract[i][3])
 
     temp = list(filter(None, temp))
     result = [ list(map(int, (xmin, ymin, xmax-xmin, ymax-ymin))) for xmin, xmax, ymin, ymax in temp ]
