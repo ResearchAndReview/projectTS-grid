@@ -5,13 +5,15 @@ from manga_ocr import MangaOcr
 
 from src.ai.detect_paragraph import detect_paragraph
 
+from PIL.Image import Image
+
 mocr = MangaOcr()
 
-def ocr(img, src_lang="일본어"):
+def ocr(img: Image, src_lang="일본어"):
     global mocr
     return mocr(img)
 
-def fully_operating_ocr(img):
+def fully_operating_ocr(img: Image):
     try:
         bounding_box = detect_paragraph(img)
         result = {"captions": []}
