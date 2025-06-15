@@ -20,8 +20,9 @@ ocr_perf = PerformanceManager(500*500)
 trans_perf = PerformanceManager(50)
 
 def handle_ocr_task(message):
+    uuid = get_config()['node']['uuid']
     response = requests.post(f"https://js.thxx.xyz/task/accept-ocr?ocrTaskId={message['ocrTaskId']}",
-                             headers={"x-uuid": "TEST01"})
+                             headers={"x-uuid": uuid})
     start_time = time.time()
     base64_string = message['imageData']
     if ',' in base64_string:
@@ -59,24 +60,24 @@ def handle_ocr_task(message):
         end_time = time.time()
         elapsed_time = end_time - start_time
         logging.info(f"OCR 작업 완료, 소요 시간: {elapsed_time}초")
-
         result['elapsedTime'] = elapsed_time
         result['ocrTaskSize'] = (img.width * img.height) ** 1.5
 
         notify_ocr_success_response = requests.post(
-            f"https://js.thxx.xyz/task/notify/ocr-success?ocrTaskId={message['ocrTaskId']}", json=result, headers={'x-uuid': 'TEST01'})
+            f"https://js.thxx.xyz/task/notify/ocr-success?ocrTaskId={message['ocrTaskId']}", json=result, headers={'x-uuid': uuid})
     except Exception as e:
         logging.error(traceback.format_exc())
         payload = {
             "error": e
         }
         notify_ocr_failed_response = requests.post(
-            f"https://js.thxx.xyz/task/notify/ocr-failed?ocrTaskId={message['ocrTaskId']}", json=payload, headers={'x-uuid': 'TEST01'})
+            f"https://js.thxx.xyz/task/notify/ocr-failed?ocrTaskId={message['ocrTaskId']}", json=payload, headers={'x-uuid': uuid})
 
 def handle_trans_task(message):
+    uuid = get_config()['node']['uuid']
     try:
         response = requests.post(f"https://js.thxx.xyz/task/accept-trans?transTaskId={message['transTaskId']}",
-                                 headers={"x-uuid": "TEST01"})
+                                 headers={"x-uuid": uuid})
         start_time = time.time()
         translated_text = trans(message['originalText'])
         logging.info(f"번역된 텍스트: {translated_text}")
@@ -91,7 +92,7 @@ def handle_trans_task(message):
 
 
         requests.post(f"https://js.thxx.xyz/task/notify/trans-success?transTaskId={message['transTaskId']}",
-                      json=payload, headers={'x-uuid': 'TEST01'})
+                      json=payload, headers={'x-uuid': uuid})
     except Exception as e:
         logging.error(traceback.format_exc())
         payload = {
@@ -99,7 +100,7 @@ def handle_trans_task(message):
         }
         notify_trans_failed_response = requests.post(
             f"https://js.thxx.xyz/task/notify/trans-failed?transTaskId={message['transTaskId']}",
-            json=payload, headers={'x-uuid': 'TEST01'})
+            json=payload, headers={'x-uuid': uuid})
 
 
 def callback(channel, method, properties, body):
@@ -128,12 +129,13 @@ def get_rabbitmq_connection():
     return connection, channel
 
 def keep_consuming(mqchannel):
+    uuid = get_config()['node']['uuid']
     def inner_method():
         while True:
             try:
-                mqchannel.queue_declare(queue='node.TEST01', durable=True)
+                mqchannel.queue_declare(queue=f'node.{uuid}', durable=True)
                 mqchannel.basic_consume(
-                    queue='node.TEST01',
+                    queue=f'node.{uuid}',
                     on_message_callback=callback,
                     auto_ack=True
                 )
