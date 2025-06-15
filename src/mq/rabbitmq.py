@@ -60,8 +60,8 @@ def handle_ocr_task(message):
         end_time = time.time()
         elapsed_time = end_time - start_time
         logging.info(f"OCR 작업 완료, 소요 시간: {elapsed_time}초")
-
         result['elapsedTime'] = elapsed_time
+        result['ocrTaskSize'] = 100 # 임시로 100으로 설정, 실제 크기 계산 필요
 
         notify_ocr_success_response = requests.post(
             f"https://js.thxx.xyz/task/notify/ocr-success?ocrTaskId={message['ocrTaskId']}", json=result, headers={'x-uuid': uuid})
@@ -88,7 +88,7 @@ def handle_trans_task(message):
         elapsed_time = end_time - start_time
         logging.info(f"번역 작업 완료, 소요 시간: {elapsed_time}초")
         payload['elapsedTime'] = elapsed_time
-
+        payload['transTaskSize'] = 100 # 임시로 100으로 설정, 실제 크기 계산 필요
 
         requests.post(f"https://js.thxx.xyz/task/notify/trans-success?transTaskId={message['transTaskId']}",
                       json=payload, headers={'x-uuid': uuid})
