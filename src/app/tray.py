@@ -18,9 +18,6 @@ def show_tray():
         icon_image,
         menu=Menu(
             MenuItem("연구검토단 Grid System Prototype", print_something, enabled=False),
-            MenuItem("기여도: 391", print_something),
-            MenuItem("OCR 테스트", file_select_ocr),
-            MenuItem("번역 테스트", translate_text),
             MenuItem("종료", on_exit),
         )
     )

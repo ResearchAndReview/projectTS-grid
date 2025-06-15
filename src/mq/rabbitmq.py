@@ -13,7 +13,11 @@ from PIL import Image
 from src.ai import detect_paragraph
 from src.ai.ocr import fully_operating_ocr, ocr
 from src.ai.trans import trans
+from src.ai.performance_manage import PerformanceManager
 from src.config import get_config
+
+ocr_perf = PerformanceManager(500*500)
+trans_perf = PerformanceManager(50)
 
 def handle_ocr_task(message):
     response = requests.post(f"https://js.thxx.xyz/task/accept-ocr?ocrTaskId={message['ocrTaskId']}",
